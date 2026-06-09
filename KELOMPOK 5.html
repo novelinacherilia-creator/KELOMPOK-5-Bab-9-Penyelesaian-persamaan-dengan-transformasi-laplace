@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelompok 5 - Transformasi Laplace</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f7; margin: 0; padding: 20px; }
+        .slide-container { max-width: 950px; margin: auto; background: white; border-radius: 28px; padding: 25px 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #dce5f0; }
+        .content-block { margin: 20px 0; padding: 15px 22px; background: #f9fbfe; border-radius: 18px; border-left: 6px solid #2c7da0; font-size: 1rem; line-height: 1.6; color: #1e2f3d; }
+        .math-block { background: #eef3fc; border-left-color: #1f6392; overflow-x: auto; }
+        h2 { color: #1f4e6e; text-align: center; margin: 0 0 10px; font-size: 1.7rem; }
+        h3 { color: #2c6280; border-left: 5px solid #2c7da0; padding-left: 15px; margin-top: 0; font-size: 1.4rem; }
+        h4 { color: #2c6280; font-size: 1.2rem; margin: 0 0 10px; }
+        button { padding: 8px 20px; border-radius: 40px; border: none; font-weight: 600; margin: 5px; cursor: pointer; background: #e2e8f0; transition: 0.2s; }
+        .next-btn { background: #2c7da0; color: white; }
+        .prev-btn { background: #5a6e7c; color: white; }
+        .mcq-option, .tf-btn { background: #e6edf4; margin: 6px; padding: 6px 18px; border-radius: 40px; border: 1px solid #cbdae6; }
+        .mcq-option:hover, .tf-btn:hover { background: #d0dfef; transform: scale(0.98); }
+        .mcq-option.selected { outline: 2px solid #2c7da0; background: #cfe3ff; }
+        .correct { background: #c8f0d1 !important; outline: 2px solid #2b7e4a; }
+        .incorrect { background: #ffd9d9 !important; outline: 2px solid #c73e3e; }
+        .feedback-msg { margin-top: 15px; padding: 12px 16px; border-radius: 20px; font-weight: 500; font-size: 0.95rem; }
+        .feedback-msg.correct { background: #dcfce7; color: #166534; }
+        .feedback-msg.incorrect { background: #fee2e2; color: #991b1b; }
+        .answer-input { width: 100%; padding: 10px 15px; border-radius: 60px; border: 1px solid #cbdae6; font-size: 1rem; }
+        .member-list { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 20px; }
+        .member-card { background: #eef3fc; border-radius: 20px; padding: 10px 18px; text-align: center; width: 220px; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 16px; overflow: hidden; }
+        th, td { border: 1px solid #cbdbe0; padding: 8px 12px; text-align: left; }
+        th { background: #e3edf5; }
+        .nav-buttons { text-align: center; margin-top: 20px; }
+        #slide-indicator { background: #e2e8f0; display: inline-block; padding: 4px 20px; border-radius: 40px; font-size: 0.85rem; margin-top: 15px; }
+        .shake { animation: shake 0.35s ease; }
+        @keyframes shake { 0%,100%{ transform: translateX(0); } 25%{ transform: translateX(-5px); } 75%{ transform: translateX(5px); } }
+        .interactive-area { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    </style>
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+            startup: { typeset: false }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+</head>
+<body>
+<div id="slide-content" class="slide-container"></div>
+<div class="nav-buttons">
+    <button id="prev-btn" class="prev-btn">← Sebelumnya</button>
+    <button id="next-btn" class="next-btn">Selanjutnya →</button>
+</div>
+<div style="text-align:center"><span id="slide-indicator"></span></div>
+
+<script>
+    // SLIDE DATA - LENGKAP MATERI TRANSFORMASI LAPLACE
+    const slides = [
+        { type: 'content', blocks: [{ html: `<h2>📘 TRANSFORMASI LAPLACE</h2><h2 style="font-size:1.3rem;">Penyelesaian Persamaan Diferensial</h2><p style="text-align:center; margin-top:25px;"><strong>Kelompok 5</strong></p>`, cls: '' }] },
+        { type: 'content', blocks: [{ html: `<h3>👥 Anggota Kelompok</h3><div class="member-list"><div class="member-card">Azza Kusuma Wardani<br>240210101025</div><div class="member-card">Jihan Salma Sa'Idah<br>240210101150</div><div class="member-card">Natasya Aprilia<br>240210101144</div><div class="member-card">Novelina Cherilia Hanasta<br>240210101166</div><div class="member-card">Dimas Andhika Dewangga Putra<br>240210101133</div><div class="member-card">Dwi Tantri Meilani<br>240210101019</div><div class="member-card">Nabila Fajriani<br>240210101139</div></div>`, cls: '' }] },
+        { type: 'content', blocks: [{ html: `<h3>📖 Definisi 9.1</h3><p>Misalkan fungsi $f(t)$ adalah suatu fungsi yang didefinisikan untuk $t \\ge 0$, integral tak wajar</p>`, cls: '' }, { html: `$$\\int_0^\\infty f(t) e^{-st} dt$$`, cls: 'math-block' }, { html: `<p>konvergen ke suatu fungsi $F(s)$, maka $F(s)$ dinyatakan sebagai transformasi Laplace dari $f(t)$. Jadi Transformasi Laplace dari suatu fungsi $f(t)$ dengan $t \\ge 0$ adalah:</p>`, cls: '' }, { html: `$$\\mathcal{L}(f) = F(s) = \\int_0^\\infty f(t) e^{-st} dt$$`, cls: 'math-block' }, { html: `<p>Hasil transformasi Laplace dari $f(t)$ dilambangkan dengan $F(s)$.</p>`, cls: '' }] },
+        { type: 'content', blocks: [{ html: `<h4>📌 Contoh 1: Fungsi Konstan $f(t)=1$</h4>`, cls: '' }, { html: `$$F(s) = \\int_0^\\infty 1 \\cdot e^{-st} dt$$`, cls: 'math-block' }, { html: `$$= \\int_0^\\infty e^{-st} dt$$`, cls: 'math-block' }, { html: `$$= \\left[ -\\frac{1}{s} e^{-st} \\right]_0^\\infty$$`, cls: 'math-block' }, { html: `$$= (0) - \\left( -\\frac{1}{s} \\cdot 1 \\right) = \\frac{1}{s}$$`, cls: 'math-block' }, { html: `<p>Jadi $\\mathcal{L}\\{1\\} = \\frac{1}{s}, \\quad s>0$</p>`, cls: '' }] },
+        { type: 'content', blocks: [{ html: `<h4>📌 Contoh 2: Fungsi Identitas $f(t)=t$</h4>`, cls: '' }, { html: `$$F(s) = \\int_0^\\infty t e^{-st} dt$$`, cls: 'math-block' }, { html: `Misalkan $u = t$, $dv = e^{-st}dt$ maka $du = dt$, $v = -\\frac{1}{s}e^{-st}$`, cls: '' }, { html: `$$= \\left[ t \\cdot \\left( -\\frac{1}{s} e^{-st} \\right) \\right]_0^\\infty - \\int_0^\\infty \\left( -\\frac{1}{s} e^{-st} \\right) dt$$`, cls: 'math-block' }, { html: `$$= \\left[ -\\frac{t}{s}e^{-st} \\right]_0^\\infty + \\frac{1}{s} \\int_0^\\infty e^{-st} dt$$`, cls: 'math-block' }, { html: `$$= (0-0) + \\frac{1}{s} \\cdot \\frac{1}{s} = \\frac{1}{s^2}$$`, cls: 'math-block' }, { html: `<p>Jadi $\\mathcal{L}\\{t\\} = \\frac{1}{s^2}$</p>`, cls: '' }] },
+        { type: 'content', blocks: [{ html: `<h4>📌 Contoh 3: Fungsi Eksponensial $f(t)=e^{-at}$</h4>`, cls: '' }, { html: `$$F(s) = \\int_0^\\infty e^{-at} e^{-st} dt = \\int_0^\\infty e^{-(s+a)t} dt$$`, cls: 'math-block' }, { html: `$$= \\left[ -\\frac{1}{s+a} e^{-(s+a)t} \\right]_0^\\infty$$`, cls: 'math-block' }, { html: `$$= 0 - \\left( -\\frac{1}{s+a} \\right) = \\frac{1}{s+a}$$`, cls: 'math-block' }, { html: `<p>Jadi $\\mathcal{L}\\{e^{-at}\\} = \\frac{1}{s+a}, \\quad s+a>0$</p>`, cls: '' }] },
+        { type: 'content', blocks: [{ html: `<h3>📊 Tabel 9.1 Transformasi Laplace Dasar</h3>`, cls: '' }, { html: `<table>
+  
+                <thead><tr><th>$f(t)$</th><th>$F(s)$</th></tr></thead>
+                <tbody>
+                    <tr><td>$1$</td><td>$\\frac{1}{s}$</td></tr>
+                    <tr><td>$t$</td><td>$\\frac{1}{s^2}$</td></tr>
+                    <tr><td>$t^n$</td><td>$\\frac{n!}{s^{n+1}}$</td></tr>
+                    <tr><td>$e^{at}$</td><td>$\\frac{1}{s-a}$</td></tr>
+                    <tr><td>$\\sin(\\omega t)$</td><td>$\\frac{\\omega}{s^2+\\omega^2}$</td></tr>
+                    <tr><td>$\\cos(\\omega t)$</td><td>$\\frac{s}{s^2+\\omega^2}$</td></tr>
+                    <tr><td>$\\sinh(at)$</td><td>$\\frac{a}{s^2-a^2}$</td></tr>
+                    <tr><td>$\\cosh(at)$</td><td>$\\frac{s}{s^2-a^2}$</td></tr>
+                </tbody>
+            </table>`, cls: 'math-block' }] },
+        { type: 'content', blocks: [{ html: `<h3>⚙️ Sifat-Sifat Transformasi Laplace</h3>`, cls: '' }, { html: `<ol><li>$\\mathcal{L}\\{a f(t)\\} = a F(s)$</li><li>$\\mathcal{L}\\{f(t)+g(t)\\} = F(s)+G(s)$</li><li>$\\mathcal{L}\\{f'(t)\\} = sF(s) - f(0)$</li><li>$\\mathcal{L}\\{f''(t)\\} = s^2F(s) - s f(0) - f'(0)$</li><li>$\\mathcal{L}\\{f^{(n)}(t)\\} = s^n F(s) - \\sum_{k=1}^n s^{n-k} f^{(k-1)}(0)$</li><li>$\\mathcal{L}\\{\\int_0^t f(\\tau) d\\tau\\} = \\frac{F(s)}{s}$</li><li>$\\mathcal{L}\\{e^{-at} f(t)\\} = F(s+a)$</li><li>$\\mathcal{L}\\{f(t-a)u(t-a)\\} = e^{-as}F(s)$</li><li>$\\mathcal{L}\\{t f(t)\\} = -\\frac{dF(s)}{ds}$</li></ol>`, cls: '' }] },
+        { type: 'content', blocks: [{ html: `<h4>🎯 Contoh 9.1: $\\mathcal{L}\\{t \\sin 3t\\}$</h4>`, cls: '' }, { html: `$$\\mathcal{L}\\{\\sin 3t\\} = \\frac{3}{s^2+9}$$`, cls: 'math-block' }, { html: `$$\\mathcal{L}\\{t \\sin 3t\\} = -\\frac{d}{ds}\\left( \\frac{3}{s^2+9} \\right)$$`, cls: 'math-block' }, { html: `$$\\frac{d}{ds}\\left( \\frac{3}{s^2+9} \\right) = -\\frac{6s}{(s^2+9)^2}$$`, cls: 'math-block' }, { html: `$$\\mathcal{L}\\{t\\sin 3t\\} = -\\left( -\\frac{6s}{(s^2+9)^2} \\right) = \\frac{6s}{(s^2+9)^2}$$`, cls: 'math-block' }] },
+        { type: 'content', blocks: [{ html: `<h3>🔄 Transformasi Laplace Balik</h3><p>Pengertian: $f(t) = \\mathcal{L}^{-1}\\{F(s)\\}$</p>`, cls: '' }, { html: `$$\\mathcal{L}^{-1}\\left\\{ \\frac{1}{s^2} \\right\\} = t$$`, cls: 'math-block' }] },
+        { type: 'content', blocks: [{ html: `<h4>📌 Contoh 9.2: $F(s) = \\frac{3}{s+2}$</h4>`, cls: '' }, { html: `$$\\mathcal{L}^{-1}\\left\\{ \\frac{3}{s+2} \\right\\} = 3 \\mathcal{L}^{-1}\\left\\{ \\frac{1}{s+2} \\right\\} = 3e^{-2t}$$`, cls: 'math-block' }] },
+        { type: 'content', blocks: [{ html: `<h4>🧩 Pecahan Parsial untuk Invers Laplace</h4><p><strong>Kasus 1: Akar real berbeda</strong><br>$$\\frac{1}{(s-\\lambda_1)(s-\\lambda_2)} \\rightarrow \\frac{1}{\\lambda_1-\\lambda_2}\\left(e^{\\lambda_1 t} - e^{\\lambda_2 t}\\right)$$</p><p><strong>Kasus 2: Akar kembar</strong><br>$$\\frac{1}{(s-\\lambda)^2} \\rightarrow t e^{\\lambda t}$$</p><p><strong>Kasus 3: Akar kompleks</strong><br>$$\\frac{\\omega}{(s-\\alpha)^2+\\omega^2} \\rightarrow e^{\\alpha t}\\sin(\\omega t)$$</p>`, cls: 'math-block' }] },
+        { type: 'content', blocks: [{ html: `<h3>📉 Penyelesaian PD Orde Satu</h3><p>Contoh 9.3: $\\frac{dy}{dt} + 2y = 0$</p>`, cls: '' }, { html: `$$\\mathcal{L}\\left\\{ \\frac{dy}{dt} \\right\\} + 2\\mathcal{L}\\{y\\} = 0$$`, cls: 'math-block' }, { html: `$$sY(s) - y(0) + 2Y(s) = 0$$`, cls: 'math-block' }, { html: `$$Y(s)(s+2) = y(0) \\quad \\Rightarrow \\quad Y(s) = \\frac{y(0)}{s+2}$$`, cls: 'math-block' }, { html: `$$y(t) = y(0) \\mathcal{L}^{-1}\\left\\{ \\frac{1}{s+2} \\right\\} = y(0) e^{-2t}$$`, cls: 'math-block' }, { html: `<p>Solusi umum: $y(t) = C e^{-2t}$ dengan $C = y(0)$</p>`, cls: '' }] },
+        { type: 'content', blocks: [{ html: `<h3>📈 PD Linear Orde Dua</h3><p>Contoh 9.4: $y'' + 2y' + y = 0$, $y(0)=1, y'(0)=0$</p>`, cls: '' }, { html: `$$\\mathcal{L}\\{y''\\} = s^2Y(s) - s y(0) - y'(0) = s^2Y(s) - s$$`, cls: 'math-block' }, { html: `$$\\mathcal{L}\\{2y'\\} = 2(sY(s) - y(0)) = 2sY(s) - 2$$`, cls: 'math-block' }, { html: `$$\\mathcal{L}\\{y\\} = Y(s)$$`, cls: 'math-block' }, { html: `$$s^2Y(s) - s + 2sY(s) - 2 + Y(s) = 0$$`, cls: 'math-block' }, { html: `$$(s^2+2s+1)Y(s) = s+2 \\quad \\Rightarrow \\quad Y(s) = \\frac{s+2}{(s+1)^2}$$`, cls: 'math-block' }, { html: `$$\\frac{s+2}{(s+1)^2} = \\frac{1}{s+1} + \\frac{1}{(s+1)^2}$$`, cls: 'math-block' }, { html: `$$y(t) = \\mathcal{L}^{-1}\\left\\{ \\frac{1}{s+1} \\right\\} + \\mathcal{L}^{-1}\\left\\{ \\frac{1}{(s+1)^2} \\right\\} = e^{-t} + t e^{-t}$$`, cls: 'math-block' }] },
+        
+        // KUIS 1 - MCQ
+        { type: 'mcq', question: 'Transformasi Laplace dari $f(t)=1$ adalah ...', options: [{ id: 'A', text: '$\\frac{1}{s^2}$' }, { id: 'B', text: '$\\frac{1}{s}$' }, { id: 'C', text: '$s$' }, { id: 'D', text: '$e^{-s}$' }], correct: 'B', 
+          fc: 'Benar! $\\mathcal{L}\\{1\\} = \\frac{1}{s}$', fi: 'Salah. Jawaban yang benar adalah $\\frac{1}{s}$' },
+        
+        // KUIS 2 - True/False
+        { type: 'tf', statement: 'Sifat transformasi Laplace: $\\mathcal{L}\\{f\'(t)\\} = sF(s) + f(0)$', correct: false, 
+          fc: 'Benar! Pernyataan tersebut SALAH. Yang benar adalah $\\mathcal{L}\\{f\'(t)\\} = sF(s) - f(0)$', 
+          fi: 'Salah pernyataan. Seharusnya $\\mathcal{L}\\{f\'(t)\\} = sF(s) - f(0)$' },
+        
+        // KUIS 3 - Isian singkat
+        { type: 'short', question: '$\\mathcal{L}^{-1}\\left\\{ \\frac{1}{s^2} \\right\\} =$ ______ (fungsi dalam t)', answers: ['t'], 
+          fc: 'Benar! Karena $\\mathcal{L}\\{t\\} = \\frac{1}{s^2}$', fi: 'Jawaban yang benar adalah $t$' },
+        
+        // KUIS 4 - Input angka
+        { type: 'numberinput', question: 'Dari contoh 9.1, $\\mathcal{L}\\{t \\sin 3t\\} = \\frac{ks}{(s^2+9)^2}$. Tentukan nilai $k$ (bilangan bulat).', correctAnswer: '6', 
+          fc: 'Benar! $\\mathcal{L}\\{t\\sin 3t\\} = \\frac{6s}{(s^2+9)^2}$, jadi $k=6$', 
+          fi: 'Hasil perhitungan yang benar adalah $\\frac{6s}{(s^2+9)^2}$, maka $k=6$' },
+        
+        // KUIS 5 - MCQ
+        { type: 'mcq', question: 'Transformasi Laplace dari $e^{-3t}$ adalah ...', options: [{ id: 'A', text: '$\\frac{1}{s-3}$' }, { id: 'B', text: '$\\frac{1}{s+3}$' }, { id: 'C', text: '$\\frac{3}{s}$' }, { id: 'D', text: '$\\frac{s}{s+3}$' }], correct: 'B', 
+          fc: 'Benar! $\\mathcal{L}\\{e^{-3t}\\} = \\frac{1}{s+3}$', fi: 'Ingat rumus: $\\mathcal{L}\\{e^{at}\\} = \\frac{1}{s-a}$. Untuk $a=-3$, hasilnya $\\frac{1}{s+3}$' },
+        
+        // KUIS 6 - Isian singkat
+        { type: 'short', question: 'Invers Laplace dari $\\frac{2}{s^2+4}$ adalah (fungsi sinus)', answers: ['sin(2t)', 'sin 2t', '\\sin(2t)'], 
+          fc: 'Benar! $\\mathcal{L}^{-1}\\left\\{ \\frac{\\omega}{s^2+\\omega^2} \\right\\} = \\sin(\\omega t)$, untuk $\\omega=2$ hasilnya $\\sin(2t)$', 
+          fi: 'Jawaban yang benar adalah $\\sin(2t)$' },
+        
+        // KUIS 7 - MCQ tentang sifat perkalian t
+        { type: 'mcq', question: 'Sifat $\\mathcal{L}\\{t f(t)\\} = ...$', options: [{ id: 'A', text: '$sF(s)-f(0)$' }, { id: 'B', text: '$\\frac{dF(s)}{ds}$' }, { id: 'C', text: '$-\\frac{dF(s)}{ds}$' }, { id: 'D', text: '$F(s+a)$' }], correct: 'C', 
+          fc: 'Benar! $\\mathcal{L}\\{t f(t)\\} = -\\frac{dF(s)}{ds}$', fi: 'Sifat yang benar adalah $\\mathcal{L}\\{t f(t)\\} = -\\frac{dF(s)}{ds}$ (Jawaban C)' },
+        
+        // Penutup
+        { type: 'content', blocks: [{ html: `<h2 style="text-align:center;">🏁 Terima Kasih</h2><p style="text-align:center;">Transformasi Laplace: metode sistematis untuk menyelesaikan Persamaan Diferensial Linear.</p><p style="text-align:center; margin-top:20px;"><strong>Kelompok 5</strong></p>`, cls: '' }] }
+    ];
+
+    // INTERAKSI
+    let currentSlide = 0, revealedBlocks = 1, interactiveAnswered = false;
+    const container = document.getElementById('slide-content');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const indicatorSpan = document.getElementById('slide-indicator');
+
+    function updateIndicator() { indicatorSpan.innerText = `Slide ${currentSlide+1} / ${slides.length}`; prevBtn.disabled = (currentSlide === 0); }
+    
+    async function typeset() { 
+        if(window.MathJax) {
+            await MathJax.typesetPromise([container]);
+        }
+    }
+    
+    function resetState() { revealedBlocks = 1; interactiveAnswered = false; }
+
+    function renderContent(slide) {
+        container.innerHTML = '';
+        for(let i=0; i<slide.blocks.length && i<revealedBlocks; i++) {
+            let div = document.createElement('div');
+            div.className = 'content-block ' + (slide.blocks[i].cls || '');
+            div.innerHTML = slide.blocks[i].html;
+            container.appendChild(div);
+        }
+        if(revealedBlocks >= slide.blocks.length) interactiveAnswered = true;
+        typeset();
+    }
+
+    function revealBlock() {
+        let slide = slides[currentSlide];
+        if(slide.type !== 'content') return false;
+        if(revealedBlocks < slide.blocks.length) { revealedBlocks++; renderContent(slide); return true; }
+        return false;
+    }
+
+    function renderMCQ(s) {
+        container.innerHTML = `<div class="content-block interactive-area"><p><strong>📝 Pilihan Ganda</strong></p><p>${s.question}</p><div class="options-area"></div><div class="feedback-msg" style="display:none;"></div></div>`;
+        let optsDiv = container.querySelector('.options-area');
+        s.options.forEach(opt => {
+            let btn = document.createElement('button');
+            btn.className = 'mcq-option';
+            btn.dataset.opt = opt.id;
+            btn.innerHTML = `${opt.id}. ${opt.text}`;
+            optsDiv.appendChild(btn);
+        });
+        let fb = container.querySelector('.feedback-msg');
+        let btns = optsDiv.querySelectorAll('.mcq-option');
+        btns.forEach(btn => {
+            btn.onclick = () => {
+                if(interactiveAnswered) return;
+                interactiveAnswered = true;
+                let chosen = btn.dataset.opt;
+                btns.forEach(b => b.classList.remove('selected','correct','incorrect'));
+                btn.classList.add('selected');
+                if(chosen === s.correct) {
+                    btn.classList.add('correct');
+                    fb.innerHTML = s.fc;
+                    fb.className = 'feedback-msg correct';
+                } else {
+                    btn.classList.add('incorrect');
+                    fb.innerHTML = s.fi;
+                    fb.className = 'feedback-msg incorrect';
+                    btns.forEach(b => { if(b.dataset.opt === s.correct) b.classList.add('correct'); });
+                }
+                fb.style.display = 'block';
+                typeset();
+            };
+        });
+        typeset();
+    }
+
+    function renderTF(s) {
+        container.innerHTML = `<div class="content-block interactive-area"><p><strong>✅❌ True/False</strong></p><p>${s.statement}</p><div><button class="tf-btn" data-val="true">✅ True</button><button class="tf-btn" data-val="false">❌ False</button></div><div class="feedback-msg" style="display:none;"></div></div>`;
+        let btns = container.querySelectorAll('.tf-btn');
+        let fb = container.querySelector('.feedback-msg');
+        btns.forEach(btn => {
+            btn.onclick = () => {
+                if(interactiveAnswered) return;
+                interactiveAnswered = true;
+                let val = btn.dataset.val === 'true';
+                btns.forEach(b => b.classList.remove('correct','incorrect'));
+                if(val === s.correct) {
+                    btn.classList.add('correct');
+                    fb.innerHTML = s.fc;
+                    fb.className = 'feedback-msg correct';
+                } else {
+                    btn.classList.add('incorrect');
+                    fb.innerHTML = s.fi;
+                    fb.className = 'feedback-msg incorrect';
+                    btns.forEach(b => { if((b.dataset.val === 'true') === s.correct) b.classList.add('correct'); });
+                }
+                fb.style.display = 'block';
+                typeset();
+            };
+        });
+        typeset();
+    }
+
+    function renderShort(s) {
+        container.innerHTML = `<div class="content-block interactive-area"><p><strong>✍️ Isian Singkat</strong></p><p>${s.question}</p><input class="answer-input" id="shortAns" placeholder="Ketik jawaban..."><div style="margin-top:10px;"><button id="checkShort">Periksa</button></div><div class="feedback-msg" style="display:none;"></div></div>`;
+        let inp = document.getElementById('shortAns');
+        let btn = document.getElementById('checkShort');
+        let fb = container.querySelector('.feedback-msg');
+        let check = () => {
+            if(interactiveAnswered) return;
+            let raw = inp.value.trim().toLowerCase().replace(/\s+/g,'').replace(/\\/g,'');
+            let ok = s.answers.some(a => a.toLowerCase().replace(/\s+/g,'').replace(/\\/g,'') === raw);
+            interactiveAnswered = true;
+            inp.classList.add(ok ? 'correct' : 'incorrect');
+            fb.innerHTML = ok ? s.fc : s.fi;
+            fb.className = `feedback-msg ${ok ? 'correct' : 'incorrect'}`;
+            fb.style.display = 'block';
+            btn.disabled = true;
+            inp.disabled = true;
+            typeset();
+        };
+        btn.onclick = check;
+        inp.onkeydown = e => { if(e.key === 'Enter') check(); };
+        typeset();
+    }
+
+    function renderNumber(s) {
+        container.innerHTML = `<div class="content-block interactive-area"><p><strong>🔢 Input Angka</strong></p><p>${s.question}</p><input class="answer-input" id="numAns" placeholder="Masukkan angka..."><div style="margin-top:10px;"><button id="checkNum">Periksa</button></div><div class="feedback-msg" style="display:none;"></div></div>`;
+        let inp = document.getElementById('numAns');
+        let btn = document.getElementById('checkNum');
+        let fb = container.querySelector('.feedback-msg');
+        let check = () => {
+            if(interactiveAnswered) return;
+            let ok = inp.value.trim() === s.correctAnswer;
+            interactiveAnswered = true;
+            inp.classList.add(ok ? 'correct' : 'incorrect');
+            fb.innerHTML = ok ? s.fc : s.fi;
+            fb.className = `feedback-msg ${ok ? 'correct' : 'incorrect'}`;
+            fb.style.display = 'block';
+            btn.disabled = true;
+            inp.disabled = true;
+            typeset();
+        };
+        btn.onclick = check;
+        inp.onkeydown = e => { if(e.key === 'Enter') check(); };
+        typeset();
+    }
+
+    function renderSlide(idx) {
+        let s = slides[idx];
+        resetState();
+        container.innerHTML = '';
+        if(s.type === 'content') renderContent(s);
+        else if(s.type === 'mcq') renderMCQ(s);
+        else if(s.type === 'tf') renderTF(s);
+        else if(s.type === 'short') renderShort(s);
+        else if(s.type === 'numberinput') renderNumber(s);
+        updateIndicator();
+    }
+
+    function nextSlide() {
+        let s = slides[currentSlide];
+        if(s.type === 'content' && revealedBlocks < s.blocks.length) { revealBlock(); return; }
+        if(!interactiveAnswered && s.type !== 'content') {
+            let ia = container.querySelector('.interactive-area');
+            if(ia) ia.classList.add('shake');
+            setTimeout(() => { if(ia) ia.classList.remove('shake'); }, 400);
+            return;
+        }
+        if(currentSlide < slides.length-1) { currentSlide++; renderSlide(currentSlide); }
+    }
+
+    function prevSlide() { if(currentSlide > 0) { currentSlide--; renderSlide(currentSlide); } }
+
+    prevBtn.onclick = prevSlide;
+    nextBtn.onclick = nextSlide;
+    document.addEventListener('keydown', e => {
+        if(e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+        if(e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+    });
+    renderSlide(0);
+</script>
+</body>
+</html>
